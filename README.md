@@ -4,6 +4,10 @@
 
 	OPENAI_API_KEY=<your_key>
 
+	and/or
+
+	GEMINI_API_KEY=<your_key>
+
 ## Run
 
 	$ make run
