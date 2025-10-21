@@ -17,27 +17,27 @@ def print_board_with_coordinates(board):
 def get_chatgpt_move_with_explanation(board):
     board_fen = board.fen()
     prompt = f"""
-        Given the current board state in FEN notation, you must respond
-        with only the best move for Black in standard algebraic notation
-        on the first line (e.g., e5, Nc6, Qxd5).
-        A brief explanation on the strategic reasoning behind the move
-        on the second line.
+        Given the current board state in FEN notation, you must respond with only the best
+        move for Black in standard algebraic notation on the first line (e.g., e5, Nc6, Qxd5).
+        
+        Add a second line with a brief explanation on the strategic reasoning behind the move.
+
         FEN:
         {board_fen}
         """
+
+    #
     system_prompt = f"""
         You are a chess-playing assistant.
         """
     try:
         response = openai.chat.completions.create(
-            model="gpt-5-nano",
+            model="gpt-5-mini",
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt}
             ],
-            reasoning_effort="minimal"
-            # temperature=0.7,
-            # max_tokens=150
+            reasoning_effort="low"
         )
         content = response.choices[0].message.content.strip()
         lines = content.split('\n')
@@ -45,13 +45,13 @@ def get_chatgpt_move_with_explanation(board):
         explanation = lines[1].strip() if len(
             lines) > 1 else "No explanation provided."
         print(f"Input tokens: {response.usage.prompt_tokens}")
-        print(f"Cached tokens: {response.usage.prompt_tokens_details.cached_tokens}")
+        print(
+            f"Cached tokens: {response.usage.prompt_tokens_details.cached_tokens}")
         print(f"Output tokens: {response.usage.completion_tokens}")
         return move, explanation
     except Exception as e:
         print("Error calling OpenAI API:", e)
-        quit
-        # return None, None
+        return None, None
 
 
 def main():
@@ -85,6 +85,7 @@ def main():
                     print(f"Computer plays: {chatgpt_move}")
                 except ValueError:
                     print("ChatGPT move could not be parsed or is illegal.")
+                    input("Press <ENTER> to retry.")
             else:
                 print("No move received from ChatGPT.")
 
