@@ -17,35 +17,41 @@ def print_board_with_coordinates(board):
 def get_chatgpt_move_with_explanation(board):
     board_fen = board.fen()
     prompt = f"""
-        You are a chess-playing assistant.
-        Given the current board state in FEN notation,
-        respond with only the best move for Black in standard
-        algebraic notation on the first line (e.g., e5, Nc6, Qxd5),
-        and a brief explanation of the strategic reasoning behind
-        the move on the second line.
-
+        Given the current board state in FEN notation, you must respond
+        with only the best move for Black in standard algebraic notation
+        on the first line (e.g., e5, Nc6, Qxd5).
+        A brief explanation on the strategic reasoning behind the move
+        on the second line.
         FEN:
         {board_fen}
         """
+    system_prompt = f"""
+        You are a chess-playing assistant.
+        """
     try:
         response = openai.chat.completions.create(
-            model="gpt-4",
+            model="gpt-5-nano",
             messages=[
-                {"role": "system", "content": "You are a helpful chess-playing assistant."},
+                {"role": "system", "content": system_prompt},
                 {"role": "user", "content": prompt}
             ],
-            temperature=0.7,
-            max_tokens=150
+            reasoning_effort="minimal"
+            # temperature=0.7,
+            # max_tokens=150
         )
         content = response.choices[0].message.content.strip()
         lines = content.split('\n')
         move = lines[0].strip() if len(lines) > 0 else ""
         explanation = lines[1].strip() if len(
             lines) > 1 else "No explanation provided."
+        print(f"Input tokens: {response.usage.prompt_tokens}")
+        print(f"Cached tokens: {response.usage.prompt_tokens_details.cached_tokens}")
+        print(f"Output tokens: {response.usage.completion_tokens}")
         return move, explanation
     except Exception as e:
         print("Error calling OpenAI API:", e)
-        return None, None
+        quit
+        # return None, None
 
 
 def main():
